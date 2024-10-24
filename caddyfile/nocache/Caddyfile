@@ -15,6 +15,7 @@
     }
 }
 
+
 (log) {
     log {
         format transform `{request>headers>X-Forwarded-For>[0]:request>remote_ip} - {user_id} [{ts}] "{request>method} {request>uri} {request>proto}" {status} {size} "{request>headers>Referer>[0]}" "{request>headers>User-Agent>[0]}"` {
@@ -41,7 +42,7 @@
         zstd best
         br 5 v2
         gzip 5
-        minimum_length 512
+        minimum_length 256
     }
 }
 
@@ -72,25 +73,24 @@
         import header_realip
     }
     import log ghproxy
-    import cache 0s 300s
     import error_page  
     import encode
-    import rate_limit 60 
+    import rate_limit 60  
     route / {
         root /data/www
         file_server
-        import cache 0s 24h
+		import cache 300s
     }
     route /favicon.ico {
         root /data/www
         file_server
-        import cache 0s 24h
+		import cache 300s
     }
-
+    
     route /api* {
         rate_limit {remote.ip} 15r/m 10000 429
-        import cache 0s 6h
-    }   
+		import cache 300s
+    }
 }
 
 import /data/caddy/config.d/*
